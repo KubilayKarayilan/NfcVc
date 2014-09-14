@@ -1,0 +1,67 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    tools:context=".MyActivity$PlaceholderFragment">
+
+    <ImageView
+        android:id="@+id/cvpic"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:background="@drawable/blurry_dots"
+        android:src="@drawable/kubypic"
+        />
+
+    <EditText
+        android:id="@+id/nameview"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/white"
+        android:text="@string/name"
+        android:paddingTop="10dp"
+        android:textSize="40dp"
+        android:gravity="center"
+        android:fontFamily="sans-serif-condensed"
+        android:cursorVisible="false"
+        />
+
+    <EditText
+        android:id="@+id/tlfview"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:background="@android:color/white"
+        android:text="@string/tlf"
+        android:textAlignment="center"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:fontFamily="sans-serif-condensed"
+        android:cursorVisible="false"
+        />
+
+    <EditText
+        android:id="@+id/emailview"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:background="@android:color/white"
+        android:text="@string/email"
+        android:textAlignment="center"
+        android:textSize="20dp"
+        android:gravity="center"
+        android:fontFamily="sans-serif-condensed"
+        android:cursorVisible="false"/>
+
+    <ImageView
+        android:id="@+id/logoview"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/white"
+        android:text="@string/logo"
+        android:textAlignment="center"
+        android:src="@drawable/downloaded"/>
+
+
+</LinearLayout>
