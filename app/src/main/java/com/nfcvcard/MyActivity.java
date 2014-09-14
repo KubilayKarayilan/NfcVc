@@ -129,8 +129,7 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         String dataString = intent.getDataString();
         Uri urien = intent.getData();
         String action = intent.getAction();
-        if (action.equals("android.intent.action.MAIN"))
-            return;
+
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
         // only one message sent during the beam
