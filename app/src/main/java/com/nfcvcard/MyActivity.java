@@ -3,6 +3,7 @@ package com.nfcvcard;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Set;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -35,9 +36,10 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 
 //import android.renderscript.*;
+import android.provider.Settings;
 import android.support.v8.renderscript.*;
 
-import android.support.v7. app.ActionBarActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -63,12 +65,14 @@ import android.widget.Toast;
 
 import com.nfcvcard.db.DatabaseExtnd;
 import com.nfcvcard.receivers.BroadCastNfc;
+import com.nfcvcard.tasks.NdefGeneralTasks;
 import com.nfcvcard.tasks.NdefReaderTask;
 import com.nfcvcard.tasks.NdefWriterTask;
 
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNdefMessageCallback{
+public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNdefMessageCallback {
+    private static final String TURN_NFC_ON = "turnOnNfc";
     //DatabaseExtnd databaseExtnd;
 
     /**
@@ -94,10 +98,11 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
 
     private PendingIntent pendingIntent;
     private IntentFilter intentFilter;
-    private String TAG="frag";
+    private String TAG = "frag";
+    private Intent nfcSettingsIntent;
 
 
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,8 +111,18 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         setContentView(R.layout.activity_my);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         databaseExtnd = new DatabaseExtnd(this);
+
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        nfcAdapter.setNdefPushMessageCallback(this,this);
+        if (!nfcAdapter.isEnabled() && !nfcAdapter.isNdefPushEnabled()){
+            Toast.makeText(getApplicationContext(), "Please activate: " +
+                    "\nNFC AND Android Beam " +
+                    "\nthan press Back to return!", Toast.LENGTH_LONG).show();
+            nfcSettingsIntent=new Intent(Settings.ACTION_NFC_SETTINGS);
+            nfcSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(nfcSettingsIntent);
+        }
+
+        nfcAdapter.setNdefPushMessageCallback(this, this);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -119,9 +134,10 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         //handleIntent(getIntent());
 
     }
+
     @Override
-    protected void onNewIntent(Intent intent){
-       Toast.makeText(this,"new intent",Toast.LENGTH_LONG).show();
+    protected void onNewIntent(Intent intent) {
+        Toast.makeText(this, "new intent", Toast.LENGTH_LONG).show();
         handleIntent(intent);
     }
 
@@ -135,7 +151,11 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         // only one message sent during the beam
         NdefMessage msg = (NdefMessage) rawMsgs[0];
         // record 0 contains the MIME type, record 1 is the AAR, if present
+        NdefRecord[] records = msg.getRecords();
+
         String incomeMsg = new String(msg.getRecords()[0].getPayload());
+        Bundle intentData = intent.getExtras();
+        Set<String> keyset = intentData.keySet();
         Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
 
     }
@@ -150,6 +170,7 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
          */
         setupForegroundDispatch(this, nfcAdapter);
     }
+
     @Override
     protected void onPause() {
         /**
@@ -159,9 +180,10 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
 
         super.onPause();
     }
+
     /**
      * @param activity The corresponding {@link Activity} requesting the foreground dispatch.
-     * @param adapter The {@link NfcAdapter} used for the foreground dispatch.
+     * @param adapter  The {@link NfcAdapter} used for the foreground dispatch.
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
@@ -176,9 +198,11 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
 
         adapter.enableForegroundDispatch(activity, pendingIntent, null, techList);
     }
+
     public static void stopForegroundDispatch(final Activity activity, NfcAdapter adapter) {
         adapter.disableForegroundDispatch(activity);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -212,18 +236,24 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         return mainBundle.getBundle(String.valueOf(id));
     }
 
-    public SQLiteDatabase getDataBase(){
+    public SQLiteDatabase getDataBase() {
         return db;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
+        Bundle bundle=getSavedData(1);
         String text = ("Beam me up, Android!\n\n" +
                 "Beam Time: " + System.currentTimeMillis());
-        NdefMessage msg = new NdefMessage(
-                new NdefRecord[] { NdefRecord.createMime(
-                        "application/vnd.com.example.android.beam", text.getBytes())});
+        NdefRecord[] recordsToSend = new NdefRecord[3];
+        recordsToSend[0]= NdefRecord.createMime("NfcVc app vc", text.getBytes());
+        recordsToSend[1]= NdefRecord.createMime("NfcVc app vc", bundle.getString("tlf").getBytes());
+         recordsToSend[2]= NdefRecord.createMime("NfcVc app vc", bundle.getByteArray("contactPic"));
+        NdefMessage msg = new NdefMessage(recordsToSend );
+
+
+
         return msg;
     }
 
@@ -339,13 +369,13 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
             clickListnerInit();
 
 
-            Bitmap bmp =((BitmapDrawable)cvPic.getDrawable()).getBitmap();
+            Bitmap bmp = ((BitmapDrawable) cvPic.getDrawable()).getBitmap();
             if (null != bmp) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byteArray = stream.toByteArray();
             }
-            Bitmap bmp2 =((BitmapDrawable)logo.getDrawable()).getBitmap();
+            Bitmap bmp2 = ((BitmapDrawable) logo.getDrawable()).getBitmap();
             if (null != bmp) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -587,23 +617,23 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
             contactBundle = myActivity.getSavedData(1);
             StringBuilder stringBuilder = new StringBuilder();
             ArrayList list = myActivity.databaseExtnd.getAllCotacts();
-            for (int i=0;i< list.size();i++){
+            for (int i = 0; i < list.size(); i++) {
                 stringBuilder.append(list.get(i));
             }
-            String s= stringBuilder.toString();
-            Toast.makeText(getActivity(),  contactBundle.getString("name")+ " is saved budy :)"+s
-                    , Toast.LENGTH_LONG).show() ;
+            String s = stringBuilder.toString();
+            Toast.makeText(getActivity(), contactBundle.getString("name") + " is saved budy :)" + s
+                    , Toast.LENGTH_LONG).show();
 
-       //     myActivity.databaseExtnd.insertContact("kubilay","999999","home",null,null);
+            //     myActivity.databaseExtnd.insertContact("kubilay","999999","home",null,null);
             if (myActivity.nfcAdapter == null) {
                 // Stop here, we definitely need NFC
                 Toast.makeText(getActivity(), "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
             }
 
             if (!myActivity.nfcAdapter.isEnabled()) {
-                Toast.makeText(getActivity(),"NFC is disabled.",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "NFC is disabled.", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(getActivity(),"NFC is enabled.",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "NFC is enabled.", Toast.LENGTH_LONG).show();
             }
 
 
