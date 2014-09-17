@@ -131,7 +131,7 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        //handleIntent(getIntent());
+         handleIntent(getIntent());
 
     }
 
@@ -145,18 +145,33 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         String dataString = intent.getDataString();
         Uri urien = intent.getData();
         String action = intent.getAction();
+        if (action.equals("android.intent.action.MAIN"))
+            return;
 
+        Tag tagFromIntent=intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        // only one message sent during the beam
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
-        // only one message sent during the beam
-        NdefMessage msg = (NdefMessage) rawMsgs[0];
-        // record 0 contains the MIME type, record 1 is the AAR, if present
-        NdefRecord[] records = msg.getRecords();
+        if (null!=rawMsgs){
+            NdefMessage msg = (NdefMessage) rawMsgs[0];
+            // record 0 contains the MIME type, record 1 is the AAR, if present
+            NdefRecord[] records = msg.getRecords();
 
-        String incomeMsg = new String(msg.getRecords()[0].getPayload());
-        Bundle intentData = intent.getExtras();
-        Set<String> keyset = intentData.keySet();
-        Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
+            String incomeMsg = new String(msg.getRecords()[0].getPayload());
+
+
+            Log.i(TAG,incomeMsg);
+            Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
+        }
+        if (null != tagFromIntent) {
+            String[] techList=tagFromIntent.getTechList();
+            StringBuilder stringBuilder= new StringBuilder("");
+            for (String s:techList) {
+                stringBuilder.append(s+"\n");
+            }
+            Log.i(TAG,stringBuilder.toString());
+        }
+
 
     }
 
@@ -246,14 +261,16 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         Bundle bundle=getSavedData(1);
         String text = ("Beam me up, Android!\n\n" +
                 "Beam Time: " + System.currentTimeMillis());
-        NdefRecord[] recordsToSend = new NdefRecord[3];
-        recordsToSend[0]= NdefRecord.createMime("NfcVc app vc", text.getBytes());
-        recordsToSend[1]= NdefRecord.createMime("NfcVc app vc", bundle.getString("tlf").getBytes());
-         recordsToSend[2]= NdefRecord.createMime("NfcVc app vc", bundle.getByteArray("contactPic"));
-        NdefMessage msg = new NdefMessage(recordsToSend );
+        String text2="kubilay rules";
+       /* NdefRecord[] recordsToSend = new NdefRecord[3];
+        recordsToSend[0]= NdefRecord.createMime("com.nfcvcard", text.getBytes());
+        recordsToSend[1]= NdefRecord.createMime("com.nfcvcard", bundle.getString("tlf").getBytes());
+         //recordsToSend[2]= NdefRecord.createMime("NfcVc app vc", bundle.getByteArray("contactPic"));
+        NdefMessage msg = new NdefMessage(recordsToSend );*/
 
-
-
+        NdefMessage msg = new NdefMessage(
+                            new NdefRecord[] { NdefRecord.createMime(
+                       "application/com.nfcvcard", text.getBytes()), NdefRecord.createMime("application/com.nfcvcard",text2.getBytes())});
         return msg;
     }
 
