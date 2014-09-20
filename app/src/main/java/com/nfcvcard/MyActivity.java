@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -66,6 +67,7 @@ import android.widget.Toast;
 
 import com.nfcvcard.db.DatabaseExtnd;
 import com.nfcvcard.receivers.BroadCastNfc;
+import com.nfcvcard.tasks.IntentDto;
 import com.nfcvcard.tasks.NdefGeneralTasks;
 import com.nfcvcard.tasks.NdefReaderTask;
 import com.nfcvcard.tasks.NdefWriterTask;
@@ -86,7 +88,6 @@ public class MyActivity extends ActionBarActivity {
     NfcAdapter nfcAdapter;
     Bundle mainBundle = new Bundle();
     IntentFilter intent;
-    NdefReaderTask ndefReaderTask;
     public static final String MIME_TEXT_PLAIN = "text/plain";
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -116,8 +117,8 @@ public class MyActivity extends ActionBarActivity {
         }
         extDir = getExternalFilesDir(null);
 
-        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(getSavedData(1)), this);
-        nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
+        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(), this);
+      //  nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -126,10 +127,9 @@ public class MyActivity extends ActionBarActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        handleIntent(getIntent());
+
 
     }
-
 
 
     @Override
@@ -143,28 +143,23 @@ public class MyActivity extends ActionBarActivity {
         Uri urien = intent.getData();
         String type = intent.getType();
         String action = intent.getAction();
-        if (action.equals("android.intent.action.MAIN"))
-            return;
+        String message = "nothing in it";
+        String  incomeMsg = "nothing in it";
+
         Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
+
         if (null != rawMsgs) {
             NdefMessage msg = (NdefMessage) rawMsgs[0];
             // record 0 contains the MIME type, record 1 is the AAR, if present
             NdefRecord[] records = msg.getRecords();
-            String incomeMsg = new String(msg.getRecords()[0].getPayload());
-            String incomeMsg2 = new String(msg.getRecords()[1].getPayload());
-            Toast.makeText(this, "incoming: " + incomeMsg + incomeMsg2, Toast.LENGTH_LONG).show();
+            incomeMsg = new String(msg.getRecords()[0].getPayload());
+            Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
-        if (null != tagFromIntent) {
-            String[] techList = tagFromIntent.getTechList();
-            StringBuilder stringBuilder = new StringBuilder("");
-            for (String s : techList) {
-                stringBuilder.append(s + "\n");
-            }
-            Log.i(TAG, stringBuilder.toString());
-        }
-Log.i(TAG,"break point");
+
+        Log.i(TAG, "break point" + message);
 
     }
 

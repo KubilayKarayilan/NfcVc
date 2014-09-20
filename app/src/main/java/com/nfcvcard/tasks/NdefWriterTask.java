@@ -23,7 +23,7 @@ public class NdefWriterTask extends AsyncTask<Tag, Void, String>  {
     @Override
     protected String doInBackground(Tag... params) {
         Tag tag = params[0];
-Boolean shouldTOff=false;
+
       //  Ndef ndef = Ndef.get(tag);
 
 
@@ -37,14 +37,6 @@ Boolean shouldTOff=false;
         return null;
     }
 
-        public NdefMessage createNdefMessage(NfcEvent event) {
-            String text = ("Beam me up, Android!\n\n" +
-                    "Beam Time: " + System.currentTimeMillis());
-            NdefMessage msg = new NdefMessage(
-                    new NdefRecord[] { NdefRecord.createMime(
-                            "application/vnd.com.example.android.beam", text.getBytes())});
-            return msg;
-        }
 
 
     @Override
