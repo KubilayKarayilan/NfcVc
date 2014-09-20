@@ -72,7 +72,7 @@ import com.nfcvcard.tasks.NdefWriterTask;
 
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNdefMessageCallback {
+public class MyActivity extends ActionBarActivity {
     private static final String TURN_NFC_ON = "turnOnNfc";
     private PendingIntent pendingIntent;
     private IntentFilter intentFilter;
@@ -116,7 +116,7 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         }
         extDir = getExternalFilesDir(null);
 
-        nfcAdapter.setNdefPushMessageCallback(this, this);
+        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(getSavedData(1)), this);
         nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
 
         // Create the adapter that will return a fragment for each of the three
@@ -129,6 +129,8 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         handleIntent(getIntent());
 
     }
+
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -162,7 +164,7 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
             }
             Log.i(TAG, stringBuilder.toString());
         }
-
+Log.i(TAG,"break point");
 
     }
 
@@ -246,25 +248,6 @@ public class MyActivity extends ActionBarActivity implements NfcAdapter.CreateNd
         return db;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public NdefMessage createNdefMessage(NfcEvent event) {
-        Bundle bundle = getSavedData(1);
-        String text = ("Beam me up, Android!\n\n" +
-                "Beam Time: " + System.currentTimeMillis());
-        String text2 = bundle.getString("name");
-       /* NdefRecord[] recordsToSend = new NdefRecord[3];
-        recordsToSend[0]= NdefRecord.createMime("com.nfcvcard", text.getBytes());
-        recordsToSend[1]= NdefRecord.createMime("com.nfcvcard", bundle.getString("tlf").getBytes());
-         //recordsToSend[2]= NdefRecord.createMime("NfcVc app vc", bundle.getByteArray("contactPic"));
-        NdefMessage msg = new NdefMessage(recordsToSend );*/
-
-        NdefMessage msg = new NdefMessage(
-                new NdefRecord[]{NdefRecord.createMime(
-                        "application/com.nfcvcard", text.getBytes()), NdefRecord.createMime(
-                        "application/com.nfcvcard", text2.getBytes())});
-        return msg;
-    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
