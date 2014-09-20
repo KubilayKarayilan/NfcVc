@@ -30,8 +30,8 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
 
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[]{NdefRecord.createMime(
-                        "application/com.nfcvcard", text.getBytes()), NdefRecord.createMime(
-                        "application/com.nfcvcard", text2.getBytes())});
+                        "text/plain", text.getBytes()), NdefRecord.createMime(
+                        "text/plain", text2.getBytes())});
         return msg;
     }
 }

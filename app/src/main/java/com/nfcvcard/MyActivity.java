@@ -141,6 +141,7 @@ public class MyActivity extends ActionBarActivity {
     private void handleIntent(Intent intent) {
         String dataString = intent.getDataString();
         Uri urien = intent.getData();
+        String type = intent.getType();
         String action = intent.getAction();
         if (action.equals("android.intent.action.MAIN"))
             return;
@@ -153,7 +154,6 @@ public class MyActivity extends ActionBarActivity {
             NdefRecord[] records = msg.getRecords();
             String incomeMsg = new String(msg.getRecords()[0].getPayload());
             String incomeMsg2 = new String(msg.getRecords()[1].getPayload());
-            Log.i(TAG, incomeMsg);
             Toast.makeText(this, "incoming: " + incomeMsg + incomeMsg2, Toast.LENGTH_LONG).show();
         }
         if (null != tagFromIntent) {
