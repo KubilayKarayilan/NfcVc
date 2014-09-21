@@ -167,7 +167,7 @@ public class MyActivity extends ActionBarActivity {
             NdefRecord[] records = msg.getRecords();
             incomeMsg = new String(msg.getRecords()[0].getPayload());
            Uri incomeMsg2 = msg.getRecords()[1].toUri();
-            byte[] iconImage= msg.getRecords()[2].getPayload();
+//            byte[] iconImage= msg.getRecords()[2].getPayload();
             String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }

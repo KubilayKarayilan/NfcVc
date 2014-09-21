@@ -2,8 +2,10 @@
 package com.nfcvcard;
 
 import android.net.Uri;
+import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
+import android.nfc.tech.NfcA;
 import android.util.Log;
 
 import java.io.File;
