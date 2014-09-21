@@ -30,6 +30,8 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
     public NdefMessage createNdefMessage(NfcEvent event) {
         String text = ("Beam me up, Android!\n\n" +
                 "Beam Time: " + System.currentTimeMillis());
+
+
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { NdefRecord.createMime(
                         "application/com.nfcvcard", text.getBytes()) ,
@@ -44,10 +46,11 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
          * and set its permissions
          */
         Uri[] mFileUris = new Uri[10];
-        String transferFile = "kubipic.jpg";
+        String transferFile = "CvPicImage.jpg";
         File extDir = externalFilesDir;
         File requestFile = new File(extDir, transferFile);
         requestFile.setReadable(true, false);
+
         // Get a URI for the File and add it to the list of URIs
         fileUri = Uri.fromFile(requestFile);
 

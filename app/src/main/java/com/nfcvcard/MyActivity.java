@@ -2,6 +2,10 @@ package com.nfcvcard;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
@@ -117,7 +121,7 @@ public class MyActivity extends ActionBarActivity {
         }
         extDir = getExternalFilesDir(null);
 
-       nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(), this);
+       nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(getSavedData(1),extDir), this);
        // nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
 
         // Create the adapter that will return a fragment for each of the three
@@ -163,8 +167,8 @@ public class MyActivity extends ActionBarActivity {
             // record 0 contains the MIME type, record 1 is the AAR, if present
             NdefRecord[] records = msg.getRecords();
             incomeMsg = new String(msg.getRecords()[0].getPayload());
-            String incomeMsg2 = new String(msg.getRecords()[1].getPayload());
-
+           Uri incomeMsg2 = msg.getRecords()[1].toUri();
+            String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
 
@@ -172,7 +176,15 @@ public class MyActivity extends ActionBarActivity {
         Log.i(TAG, "break point" + message);
 
     }
+    public String handleFileUri(Uri beamUri) {
+        // Get the path part of the URI
+        String fileName = beamUri.getPath();
+        // Create a File object for this filename
+        File copiedFile = new File(fileName);
+        // Get a string containing the file's parent directory
 
+        return copiedFile.getParent();
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -387,7 +399,32 @@ public class MyActivity extends ActionBarActivity {
             bundle.putString("tlf", tlf.getText().toString());
             bundle.putString("email", email.getText().toString());
             myActivity.saveData(1, bundle);
+            String path = myActivity.getExternalFilesDir(null).getPath();
+            OutputStream fOut = null;
+            File file = new File(path, "CvPicImage.jpg");
+            try {
+                fOut = new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
 
+            bmp.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+            try {
+                fOut.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                fOut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                MediaStore.Images.Media.insertImage(myActivity.getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             Bitmap bitmap = ((BitmapDrawable) cvPic.getDrawable()).getBitmap();
             //  Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 120, 120, false));
             Bitmap cropedBit = getCroppedBitmap(bitmap);
