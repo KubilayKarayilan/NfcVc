@@ -117,8 +117,8 @@ public class MyActivity extends ActionBarActivity {
         }
         extDir = getExternalFilesDir(null);
 
-        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(), this);
-      //  nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
+       nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(), this);
+       // nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -141,12 +141,19 @@ public class MyActivity extends ActionBarActivity {
     private void handleIntent(Intent intent) {
         String dataString = intent.getDataString();
         Uri urien = intent.getData();
+        Uri uri;
         String type = intent.getType();
         String action = intent.getAction();
         String message = "nothing in it";
         String  incomeMsg = "nothing in it";
+        String stringSchema = "notFile";
+        if (null !=urien)
+        {
+            stringSchema = urien.getScheme();
 
-        Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        }
+
+    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
@@ -156,8 +163,11 @@ public class MyActivity extends ActionBarActivity {
             // record 0 contains the MIME type, record 1 is the AAR, if present
             NdefRecord[] records = msg.getRecords();
             incomeMsg = new String(msg.getRecords()[0].getPayload());
+            String incomeMsg2 = new String(msg.getRecords()[1].getPayload());
+
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
+
 
         Log.i(TAG, "break point" + message);
 

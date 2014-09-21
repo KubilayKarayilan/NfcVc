@@ -24,18 +24,22 @@ public class FileUriCallback implements NfcAdapter.CreateBeamUrisCallback {
 
     @Override
     public Uri[] createBeamUris(NfcEvent event) {
-        Uri[] mFileUris = new Uri[10];
-        String transferFile = "kubypic.jpg";
-
+          /*
+         * Create a list of URIs, get a File,
+         * and set its permissions
+         */
+         Uri[] mFileUris = new Uri[10];
+        String transferFile = "kubipic.jpg";
         File extDir = externalFilesDir;
         File requestFile = new File(extDir, transferFile);
         requestFile.setReadable(true, false);
         // Get a URI for the File and add it to the list of URIs
         fileUri = Uri.fromFile(requestFile);
-        if (fileUri != null) {
+
+        if (null != fileUri) {
             mFileUris[0] = fileUri;
         } else {
-            Log.e("frag", "No File URI available for file.*************");
+            Log.e("My Activity", "No File URI available for file.");
         }
         return mFileUris;
     }
