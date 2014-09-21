@@ -19,24 +19,25 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
     private Bundle bundleData;
     private File externalFilesDir;
     private Uri fileUri;
+    private MyActivity myActivity;
 
     public NdefMessageCallback() {
     }
-  /*  */public NdefMessageCallback(Bundle bundleData,File externalFilesDir) {
-        this.bundleData = bundleData;
+  /*  */public NdefMessageCallback(File externalFilesDir,MyActivity myActivity) {
+        this.myActivity= myActivity;
         this.externalFilesDir = externalFilesDir;
     }
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
         String text = ("Beam me up, Android!\n\n" +
                 "Beam Time: " + System.currentTimeMillis());
-
-
+        NdefRecord picRecord = new NdefRecord(NdefRecord.TNF_MIME_MEDIA,
+                "image/jpeg".getBytes(), null, myActivity.getSavedData(1).getByteArray("contactPic"));
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { NdefRecord.createMime(
                         "application/com.nfcvcard", text.getBytes()) ,
-                        NdefRecord.createUri(createBeamUris())
-
+                        NdefRecord.createUri(createBeamUris()),
+                        picRecord
                 });
         return msg;
     }

@@ -120,8 +120,7 @@ public class MyActivity extends ActionBarActivity {
             startActivity(nfcSettingsIntent);
         }
         extDir = getExternalFilesDir(null);
-
-       nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(getSavedData(1),extDir), this);
+        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir,this),this);
        // nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
 
         // Create the adapter that will return a fragment for each of the three
@@ -168,6 +167,7 @@ public class MyActivity extends ActionBarActivity {
             NdefRecord[] records = msg.getRecords();
             incomeMsg = new String(msg.getRecords()[0].getPayload());
            Uri incomeMsg2 = msg.getRecords()[1].toUri();
+            byte[] iconImage= msg.getRecords()[2].getPayload();
             String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
@@ -381,7 +381,7 @@ public class MyActivity extends ActionBarActivity {
             Bitmap bmp = ((BitmapDrawable) cvPic.getDrawable()).getBitmap();
             if (null != bmp) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byteArray = stream.toByteArray();
             }
             Bitmap bmp2 = ((BitmapDrawable) logo.getDrawable()).getBitmap();
@@ -435,6 +435,7 @@ public class MyActivity extends ActionBarActivity {
             cvPic.setBackgroundDrawable(backgroundD);
             cvPic.setImageDrawable(d);
             cvPic.getBackground().setAlpha(Color.argb(-10, -50, -50, -50));
+
 
             return rootView;
         }
