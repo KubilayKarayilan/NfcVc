@@ -3,6 +3,7 @@ package com.nfcvcard;
 
 import android.net.Uri;
 import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
 import android.nfc.tech.NfcA;
@@ -43,7 +44,9 @@ public class FileUriCallback implements NfcAdapter.CreateBeamUrisCallback {
         } else {
             Log.e("My Activity", "No File URI available for file.");
         }
+
         return mFileUris;
     }
+
 
 }

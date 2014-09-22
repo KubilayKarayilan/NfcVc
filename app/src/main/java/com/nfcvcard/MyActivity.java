@@ -55,6 +55,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -120,9 +121,9 @@ public class MyActivity extends ActionBarActivity {
             startActivity(nfcSettingsIntent);
         }
         extDir = getExternalFilesDir(null);
-        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir,this),this);
-       // nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
 
+        //  nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
+       nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir,this),this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -142,21 +143,16 @@ public class MyActivity extends ActionBarActivity {
     }
 
     private void handleIntent(Intent intent) {
-        String dataString = intent.getDataString();
+
         Uri urien = intent.getData();
         Uri uri;
         String type = intent.getType();
         String action = intent.getAction();
         String message = "nothing in it";
         String  incomeMsg = "nothing in it";
-        String stringSchema = "notFile";
-        if (null !=urien)
-        {
-            stringSchema = urien.getScheme();
 
-        }
 
-    Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
@@ -166,9 +162,9 @@ public class MyActivity extends ActionBarActivity {
             // record 0 contains the MIME type, record 1 is the AAR, if present
             NdefRecord[] records = msg.getRecords();
             incomeMsg = new String(msg.getRecords()[0].getPayload());
-           Uri incomeMsg2 = msg.getRecords()[1].toUri();
-//            byte[] iconImage= msg.getRecords()[2].getPayload();
-            String s = handleFileUri(incomeMsg2);
+            Uri incomeMsg2 = msg.getRecords()[1].toUri();
+            handleFileUri(incomeMsg2);
+         //   String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
 
@@ -179,6 +175,7 @@ public class MyActivity extends ActionBarActivity {
     public String handleFileUri(Uri beamUri) {
         // Get the path part of the URI
         String fileName = beamUri.getPath();
+
         // Create a File object for this filename
         File copiedFile = new File(fileName);
         // Get a string containing the file's parent directory
