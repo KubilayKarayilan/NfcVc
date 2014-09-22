@@ -11,6 +11,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 /**
  * Created by K on 9/20/2014.
@@ -31,8 +32,7 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
     public NdefMessage createNdefMessage(NfcEvent event) {
         String text = ("Beam me up, Android!\n\n" +
                 "Beam Time: " + System.currentTimeMillis());
-        NdefRecord picRecord = new NdefRecord(NdefRecord.TNF_MIME_MEDIA,
-                "image/jpeg".getBytes(), null, myActivity.getSavedData(1).getByteArray("contactPic"));
+
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { NdefRecord.createMime(
                         "application/com.nfcvcard", text.getBytes()) ,
@@ -45,6 +45,11 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
          * Create a list of URIs, get a File,
          * and set its permissions
          */
+        Bundle bundle=myActivity.getSavedData(1);
+        ArrayList<Uri> uris= bundle.getParcelableArrayList("imageUri");
+        if (uris.size()>0)
+            return uris.get(0);
+
         Uri[] mFileUris = new Uri[10];
         String transferFile = "CvPicImage.jpg";
         File extDir = externalFilesDir;

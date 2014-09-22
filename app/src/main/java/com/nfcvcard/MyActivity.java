@@ -71,6 +71,7 @@ import android.widget.Toast;
 
 
 import com.nfcvcard.db.DatabaseExtnd;
+import com.nfcvcard.db.Person;
 import com.nfcvcard.receivers.BroadCastNfc;
 import com.nfcvcard.tasks.IntentDto;
 import com.nfcvcard.tasks.NdefGeneralTasks;
@@ -99,6 +100,7 @@ public class MyActivity extends ActionBarActivity {
      */
     ViewPager mViewPager;
     private File extDir;
+    private ArrayList contactList;
 
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -131,6 +133,11 @@ public class MyActivity extends ActionBarActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        int cSize=databaseExtnd.getAllCotacts().size();
+            contactList=databaseExtnd.getAllCotacts();
+            Bundle contact= new Bundle();
+            contact.putParcelableArrayList("contactList",contactList);
+            saveData(2, contact);
 
 
     }
@@ -172,7 +179,43 @@ public class MyActivity extends ActionBarActivity {
         Log.i(TAG, "break point" + message);
 
     }
+
+    public String handleContentUri(Uri beamUri) {
+        // Position of the filename in the query Cursor
+        int filenameIndex;
+        // File object for the filename
+        File copiedFile;
+        // The filename stored in MediaStore
+        String fileName;
+        // Test the authority of the URI
+
+            // Get the column that contains the file name
+            String[] projection = { MediaStore.MediaColumns.DATA };
+            Cursor pathCursor =
+                    getContentResolver().query(beamUri, projection,
+                            null, null, null);
+            // Check for a valid cursor
+            if (pathCursor != null &&
+                    pathCursor.moveToFirst()) {
+                // Get the column index in the Cursor
+                filenameIndex = pathCursor.getColumnIndex(
+                        MediaStore.MediaColumns.DATA);
+                // Get the full file name including path
+                fileName = pathCursor.getString(filenameIndex);
+                // Create a File object for the filename
+                copiedFile = new File(fileName);
+                // Return the parent directory of the file
+                return  copiedFile.getParent();
+            } else {
+                // The query didn't work; return null
+                return null;
+            }
+
+    }
     public String handleFileUri(Uri beamUri) {
+        if(TextUtils.equals(beamUri.getScheme(),"content")) {
+            return handleContentUri(beamUri);
+        }
         // Get the path part of the URI
         String fileName = beamUri.getPath();
 
@@ -258,10 +301,6 @@ public class MyActivity extends ActionBarActivity {
         return mainBundle.getBundle(String.valueOf(id));
     }
 
-    public SQLiteDatabase getDataBase() {
-        return db;
-    }
-
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -318,6 +357,7 @@ public class MyActivity extends ActionBarActivity {
      */
     public static Bitmap getBitmapFromCameraData(Intent data, Context context) {
         Uri selectedImage = data.getData();
+
         String[] filePathColumn = {MediaStore.Images.Media.DATA};
         Cursor cursor = context.getContentResolver().query(selectedImage, filePathColumn, null, null, null);
         cursor.moveToFirst();
@@ -343,6 +383,9 @@ public class MyActivity extends ActionBarActivity {
         private TextView email;
         private ImageView logo;
         private View rootView;
+        private   MyActivity myActivity;
+        private Bundle contactBundle;
+        private ArrayList contactList;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -364,14 +407,22 @@ public class MyActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.fragment_my, container, false);
+            myActivity = (MyActivity) getActivity();
+            contactBundle=myActivity.getSavedData(2);
+            contactList=contactBundle.getParcelableArrayList("contactList");
+
             byte[] byteArray = null;
             byte[] byteArray2 = null;
+
             cvPic = (ImageView) rootView.findViewById(R.id.cvpic);
             name = (EditText) rootView.findViewById(R.id.nameview);
             tlf = (TextView) rootView.findViewById(R.id.tlfview);
             email = (TextView) rootView.findViewById(R.id.emailview);
             logo = (ImageView) rootView.findViewById(R.id.logoview);
-
+            if (contactList.size()==0){
+                 cvPic.setImageDrawable(getResources().getDrawable(R.drawable.unknown));
+                 logo.setImageDrawable(getResources().getDrawable(R.drawable.logohere));
+            }
             clickListnerInit();
 
 
@@ -388,10 +439,11 @@ public class MyActivity extends ActionBarActivity {
                 byteArray2 = stream.toByteArray();
             }
 
-            MyActivity myActivity = (MyActivity) getActivity();
+
             Bundle bundle = new Bundle();
             bundle.putString("name", name.getText().toString());
             bundle.putByteArray("contactPic", byteArray);
+            bundle.putParcelableArrayList("imageUri",null);
             bundle.putByteArray("logo", byteArray2);
             bundle.putString("tlf", tlf.getText().toString());
             bundle.putString("email", email.getText().toString());
@@ -536,6 +588,11 @@ public class MyActivity extends ActionBarActivity {
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
             if (requestCode == 1001 && resultCode == Activity.RESULT_OK) {
+                ArrayList<Uri> uris= new ArrayList<>();
+                uris.add(data.getData());
+                Bundle bundle=myActivity.getSavedData(1);
+                bundle.putParcelableArrayList("imageUri",uris);
+                myActivity.saveData(1,bundle);
                 Bitmap bitmap = getBitmapFromCameraData(data, cvPic.getContext());
                 Bitmap cropedBit = getCroppedBitmap(bitmap);
                 Drawable d = new BitmapDrawable(getResources(), Bitmap.createBitmap(cropedBit));
@@ -648,6 +705,8 @@ public class MyActivity extends ActionBarActivity {
             MyActivity myActivity = (MyActivity) getActivity();
             contactBundle = myActivity.getSavedData(1);
             StringBuilder stringBuilder = new StringBuilder();
+            myActivity.databaseExtnd.insertContact(contactBundle.getString("name"),
+                    contactBundle.getString("phone"),contactBundle.getString("email"),null,null);
             ArrayList list = myActivity.databaseExtnd.getAllCotacts();
             for (int i = 0; i < list.size(); i++) {
                 stringBuilder.append(list.get(i));
@@ -656,28 +715,7 @@ public class MyActivity extends ActionBarActivity {
             Toast.makeText(getActivity(), contactBundle.getString("name") + " is saved budy :)" + s
                     , Toast.LENGTH_LONG).show();
 
-            //     myActivity.databaseExtnd.insertContact("kubilay","999999","home",null,null);
-            if (myActivity.nfcAdapter == null) {
-                // Stop here, we definitely need NFC
-                Toast.makeText(getActivity(), "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
-            }
 
-            if (!myActivity.nfcAdapter.isEnabled()) {
-                Toast.makeText(getActivity(), "NFC is disabled.", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(getActivity(), "NFC is enabled.", Toast.LENGTH_LONG).show();
-            }
-
-
-          /*  if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(myActivity.getIntent().getAction())) {
-                Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-                if (rawMsgs != null) {
-                    NdefMessage[] msgs = new NdefMessage[rawMsgs.length];
-                    for (int i = 0; i < rawMsgs.length; i++) {
-                        msgs[i] = (NdefMessage) rawMsgs[i];
-                    }
-                }
-            }*/
             return rootView;
         }
     }
