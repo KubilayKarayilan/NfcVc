@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -125,7 +126,7 @@ public class MyActivity extends ActionBarActivity {
         extDir = getExternalFilesDir(null);
 
         //  nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
-       nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir,this),this);
+        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -133,11 +134,11 @@ public class MyActivity extends ActionBarActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        int cSize=databaseExtnd.getAllCotacts().size();
-            contactList=databaseExtnd.getAllCotacts();
-            Bundle contact= new Bundle();
-            contact.putParcelableArrayList("contactList",contactList);
-            saveData(2, contact);
+        int cSize = databaseExtnd.getAllCotacts().size();
+        contactList = databaseExtnd.getAllCotacts();
+        Bundle contact = new Bundle();
+        contact.putParcelableArrayList("contactList", contactList);
+        saveData(2, contact);
 
 
     }
@@ -156,7 +157,7 @@ public class MyActivity extends ActionBarActivity {
         String type = intent.getType();
         String action = intent.getAction();
         String message = "nothing in it";
-        String  incomeMsg = "nothing in it";
+        String incomeMsg = "nothing in it";
 
 
         Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
@@ -171,7 +172,7 @@ public class MyActivity extends ActionBarActivity {
             incomeMsg = new String(msg.getRecords()[0].getPayload());
             Uri incomeMsg2 = msg.getRecords()[1].toUri();
             handleFileUri(incomeMsg2);
-         //   String s = handleFileUri(incomeMsg2);
+            //   String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
 
@@ -189,31 +190,32 @@ public class MyActivity extends ActionBarActivity {
         String fileName;
         // Test the authority of the URI
 
-            // Get the column that contains the file name
-            String[] projection = { MediaStore.MediaColumns.DATA };
-            Cursor pathCursor =
-                    getContentResolver().query(beamUri, projection,
-                            null, null, null);
-            // Check for a valid cursor
-            if (pathCursor != null &&
-                    pathCursor.moveToFirst()) {
-                // Get the column index in the Cursor
-                filenameIndex = pathCursor.getColumnIndex(
-                        MediaStore.MediaColumns.DATA);
-                // Get the full file name including path
-                fileName = pathCursor.getString(filenameIndex);
-                // Create a File object for the filename
-                copiedFile = new File(fileName);
-                // Return the parent directory of the file
-                return  copiedFile.getParent();
-            } else {
-                // The query didn't work; return null
-                return null;
-            }
+        // Get the column that contains the file name
+        String[] projection = {MediaStore.MediaColumns.DATA};
+        Cursor pathCursor =
+                getContentResolver().query(beamUri, projection,
+                        null, null, null);
+        // Check for a valid cursor
+        if (pathCursor != null &&
+                pathCursor.moveToFirst()) {
+            // Get the column index in the Cursor
+            filenameIndex = pathCursor.getColumnIndex(
+                    MediaStore.MediaColumns.DATA);
+            // Get the full file name including path
+            fileName = pathCursor.getString(filenameIndex);
+            // Create a File object for the filename
+            copiedFile = new File(fileName);
+            // Return the parent directory of the file
+            return copiedFile.getParent();
+        } else {
+            // The query didn't work; return null
+            return null;
+        }
 
     }
+
     public String handleFileUri(Uri beamUri) {
-        if(TextUtils.equals(beamUri.getScheme(),"content")) {
+        if (TextUtils.equals(beamUri.getScheme(), "content")) {
             return handleContentUri(beamUri);
         }
         // Get the path part of the URI
@@ -225,6 +227,7 @@ public class MyActivity extends ActionBarActivity {
 
         return copiedFile.getParent();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -383,7 +386,7 @@ public class MyActivity extends ActionBarActivity {
         private TextView email;
         private ImageView logo;
         private View rootView;
-        private   MyActivity myActivity;
+        private MyActivity myActivity;
         private Bundle contactBundle;
         private ArrayList contactList;
 
@@ -408,8 +411,8 @@ public class MyActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.fragment_my, container, false);
             myActivity = (MyActivity) getActivity();
-            contactBundle=myActivity.getSavedData(2);
-            contactList=contactBundle.getParcelableArrayList("contactList");
+            contactBundle = myActivity.getSavedData(2);
+            contactList = contactBundle.getParcelableArrayList("contactList");
 
             byte[] byteArray = null;
             byte[] byteArray2 = null;
@@ -419,9 +422,16 @@ public class MyActivity extends ActionBarActivity {
             tlf = (TextView) rootView.findViewById(R.id.tlfview);
             email = (TextView) rootView.findViewById(R.id.emailview);
             logo = (ImageView) rootView.findViewById(R.id.logoview);
-            if (contactList.size()==0){
-                 cvPic.setImageDrawable(getResources().getDrawable(R.drawable.unknown));
-                 logo.setImageDrawable(getResources().getDrawable(R.drawable.logohere));
+            if (contactList.size() == 0) {
+                cvPic.setImageDrawable(getResources().getDrawable(R.drawable.unknown));
+                logo.setImageDrawable(getResources().getDrawable(R.drawable.logohere));
+            }else {
+                StringBuilder stringBuilder=new StringBuilder("");
+
+                for (Object s:contactList) {
+                    stringBuilder.append((String)s);
+                }
+                Log.i("dude",stringBuilder.toString());
             }
             clickListnerInit();
 
@@ -443,7 +453,7 @@ public class MyActivity extends ActionBarActivity {
             Bundle bundle = new Bundle();
             bundle.putString("name", name.getText().toString());
             bundle.putByteArray("contactPic", byteArray);
-            bundle.putParcelableArrayList("imageUri",null);
+            bundle.putParcelableArrayList("imageUri", null);
             bundle.putByteArray("logo", byteArray2);
             bundle.putString("tlf", tlf.getText().toString());
             bundle.putString("email", email.getText().toString());
@@ -470,7 +480,7 @@ public class MyActivity extends ActionBarActivity {
             }
 
             try {
-                MediaStore.Images.Media.insertImage(myActivity.getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
+                MediaStore.Images.Media.insertImage(myActivity.getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -586,13 +596,13 @@ public class MyActivity extends ActionBarActivity {
 
 
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+            Bundle bundle;
             if (requestCode == 1001 && resultCode == Activity.RESULT_OK) {
-                ArrayList<Uri> uris= new ArrayList<>();
+                ArrayList<Uri> uris = new ArrayList<>();
                 uris.add(data.getData());
-                Bundle bundle=myActivity.getSavedData(1);
-                bundle.putParcelableArrayList("imageUri",uris);
-                myActivity.saveData(1,bundle);
+                bundle = myActivity.getSavedData(1);
+                bundle.putParcelableArrayList("imageUri", uris);
+                myActivity.saveData(1, bundle);
                 Bitmap bitmap = getBitmapFromCameraData(data, cvPic.getContext());
                 Bitmap cropedBit = getCroppedBitmap(bitmap);
                 Drawable d = new BitmapDrawable(getResources(), Bitmap.createBitmap(cropedBit));
@@ -602,7 +612,12 @@ public class MyActivity extends ActionBarActivity {
                 cvPic.getBackground().setAlpha(Color.argb(-10, -50, -50, -50));
             }
             if (requestCode == 1002 && resultCode == Activity.RESULT_OK) {
-                Bitmap bitmap = getBitmapFromCameraData(data, cvPic.getContext());
+                ArrayList<Uri> uris = new ArrayList<>();
+                uris.add(data.getData());
+                bundle = myActivity.getSavedData(1);
+                bundle.putParcelableArrayList("logo", uris);
+                myActivity.saveData(1, bundle);
+                Bitmap bitmap = getBitmapFromCameraData(data, logo.getContext());
                 Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, logo.getWidth(), logo.getHeight(), false));
                 logo.setImageDrawable(d);
             }
@@ -701,19 +716,32 @@ public class MyActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+            int owner = 0;
             View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
             MyActivity myActivity = (MyActivity) getActivity();
             contactBundle = myActivity.getSavedData(1);
             StringBuilder stringBuilder = new StringBuilder();
-            myActivity.databaseExtnd.insertContact(contactBundle.getString("name"),
-                    contactBundle.getString("phone"),contactBundle.getString("email"),null,null);
+
             ArrayList list = myActivity.databaseExtnd.getAllCotacts();
-            for (int i = 0; i < list.size(); i++) {
-                stringBuilder.append(list.get(i));
+            if (  list.size() > 0) {
+                for (int i = 0; i < list.size(); i++) {
+                    stringBuilder.append(list.get(i));
+                }
+
+                String s = stringBuilder.toString();
+                myActivity.databaseExtnd.updateContact(0,contactBundle.getString("name"),
+                        contactBundle.getString("tlf"), contactBundle.getString("email"), null,null);
+                Toast.makeText(getActivity(), contactBundle.getString("name") + " updated :)" + s
+                        , Toast.LENGTH_LONG).show();
+
+            } else {
+                myActivity.databaseExtnd.insertContact(contactBundle.getString("name"),
+                        contactBundle.getString("tlf"), contactBundle.getString("email"), null, null, 1);
+                Toast.makeText(getActivity(), contactBundle.getString("name") + " created :)"
+                        , Toast.LENGTH_LONG).show();
             }
-            String s = stringBuilder.toString();
-            Toast.makeText(getActivity(), contactBundle.getString("name") + " is saved budy :)" + s
-                    , Toast.LENGTH_LONG).show();
+
+
 
 
             return rootView;

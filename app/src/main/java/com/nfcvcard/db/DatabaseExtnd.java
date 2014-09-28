@@ -20,9 +20,10 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
     public static final String CONTACTS_COLUMN_ID = "id";
     public static final String CONTACTS_COLUMN_NAME = "name";
     public static final String CONTACTS_COLUMN_EMAIL = "email";
-    public static final String LOGO_URI = "logouri";
-    public static final String CONTATS_PIC_URI = "picuri";
+    public static final String CONTACTS_LOGO_URI = "logouri";
+    public static final String CONTACTS_PIC_URI = "picuri";
     public static final String CONTACTS_COLUMN_PHONE = "phone";
+    public static final String CONTACTS_COLUMN_OWNER = "owner";
 
 
 
@@ -34,7 +35,7 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table if not exists nfc_contacts " +
-                        "(id integer primary key, name text,phone text,email text, logouri text,picuri text)"
+                        "(id integer primary key, name text,phone text,email text, logouri text,picuri text, owner integer)"
         );
     }
 
@@ -44,7 +45,7 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public boolean insertContact  (String name, String phone, String email, Uri logo,Uri picuri)
+    public boolean insertContact  (String name, String phone, String email, Uri logo,Uri picuri,int owner)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -56,8 +57,10 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         contentValues.put("logouri", logo.toString());
         if (null!=picuri)
         contentValues.put("picuri",picuri.toString());
+        contentValues.put("owner",owner);
 
         db.insert("nfc_contacts", null, contentValues);
+
         return true;
     }
     public Cursor getData(int id){
@@ -77,7 +80,9 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         contentValues.put("name", name);
         contentValues.put("phone", phone);
         contentValues.put("email", email);
+        if (null!= logo)
         contentValues.put("logouri", logo.toString());
+        if (null!=picuri)
         contentValues.put("picuri", picuri.toString());
         db.update("nfc_contacts", contentValues, "id = ? ", new String[] { Integer.toString(id) } );
         return true;
@@ -98,7 +103,13 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         Cursor res =  db.rawQuery( "select * from nfc_contacts", null );
         res.moveToFirst();
         while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME)));
+            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID)) +":"+
+                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME))+":"+
+                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_PHONE))+":"+
+                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_EMAIL))+":"+
+                    res.getString(res.getColumnIndex(CONTACTS_PIC_URI))+":"+
+                    res.getString(res.getColumnIndex(CONTACTS_LOGO_URI))
+            );
             res.moveToNext();
         }
         return array_list;
