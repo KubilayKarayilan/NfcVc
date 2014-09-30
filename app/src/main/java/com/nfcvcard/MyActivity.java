@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -113,7 +114,6 @@ public class MyActivity extends ActionBarActivity {
         setContentView(R.layout.activity_my);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         databaseExtnd = new DatabaseExtnd(this);
-
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (!nfcAdapter.isEnabled() && !nfcAdapter.isNdefPushEnabled()) {
             Toast.makeText(getApplicationContext(), "Please activate: " +
@@ -136,6 +136,7 @@ public class MyActivity extends ActionBarActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
         int cSize = databaseExtnd.getAllCotacts().size();
         contactList = databaseExtnd.getAllCotacts();
+        this.getDatabasePath("nfcvcard.db");
         Bundle contact = new Bundle();
         contact.putParcelableArrayList("contactList", contactList);
         saveData(2, contact);
@@ -432,6 +433,8 @@ public class MyActivity extends ActionBarActivity {
                     stringBuilder.append((String)s);
                 }
                 Log.i("dude",stringBuilder.toString());
+           //     cvPic.setImageURI(Uri.parse());
+                //her skal du legge dem i bundle image uri
             }
             clickListnerInit();
 
@@ -439,7 +442,7 @@ public class MyActivity extends ActionBarActivity {
             Bitmap bmp = ((BitmapDrawable) cvPic.getDrawable()).getBitmap();
             if (null != bmp) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byteArray = stream.toByteArray();
             }
             Bitmap bmp2 = ((BitmapDrawable) logo.getDrawable()).getBitmap();
@@ -460,14 +463,15 @@ public class MyActivity extends ActionBarActivity {
             myActivity.saveData(1, bundle);
             String path = myActivity.getExternalFilesDir(null).getPath();
             OutputStream fOut = null;
-            File file = new File(path, "CvPicImage.jpg");
+            // Make unknown image
+            File file = new File(path, "unknown.png");
             try {
                 fOut = new FileOutputStream(file);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
 
-            bmp.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+            bmp.compress(Bitmap.CompressFormat.PNG, 85, fOut);
             try {
                 fOut.flush();
             } catch (IOException e) {
@@ -579,22 +583,6 @@ public class MyActivity extends ActionBarActivity {
             });
         }
 
-        @Override
-        public void onPause() {
-            super.onPause();
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-        }
-
-
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             Bundle bundle;
             if (requestCode == 1001 && resultCode == Activity.RESULT_OK) {
@@ -621,6 +609,22 @@ public class MyActivity extends ActionBarActivity {
                 Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, logo.getWidth(), logo.getHeight(), false));
                 logo.setImageDrawable(d);
             }
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+        }
+
+
+        @Override
+        public void onResume() {
+            super.onResume();
         }
     }
 
@@ -724,19 +728,26 @@ public class MyActivity extends ActionBarActivity {
 
             ArrayList list = myActivity.databaseExtnd.getAllCotacts();
             if (  list.size() > 0) {
+
+                List imageUriList=contactBundle.getParcelableArrayList("imageUri");
+                List logoUriList=contactBundle.getParcelableArrayList("logo");
+
+                myActivity.databaseExtnd.updateContact(0,contactBundle.getString("name"),
+                        contactBundle.getString("tlf"), contactBundle.getString("email"),  logoUriList.get(0).toString() ,
+                        imageUriList.get(0).toString()  );
+                list = myActivity.databaseExtnd.getAllCotacts();
                 for (int i = 0; i < list.size(); i++) {
                     stringBuilder.append(list.get(i));
                 }
 
                 String s = stringBuilder.toString();
-                myActivity.databaseExtnd.updateContact(0,contactBundle.getString("name"),
-                        contactBundle.getString("tlf"), contactBundle.getString("email"), null,null);
-                Toast.makeText(getActivity(), contactBundle.getString("name") + " updated :)" + s
+                Toast.makeText(getActivity(), " updated :)" + s
                         , Toast.LENGTH_LONG).show();
 
             } else {
                 myActivity.databaseExtnd.insertContact(contactBundle.getString("name"),
-                        contactBundle.getString("tlf"), contactBundle.getString("email"), null, null, 1);
+                        contactBundle.getString("tlf"), contactBundle.getString("email"),
+                        contactBundle.getString("logo"), contactBundle.getString("imageUri"), 1);
                 Toast.makeText(getActivity(), contactBundle.getString("name") + " created :)"
                         , Toast.LENGTH_LONG).show();
             }

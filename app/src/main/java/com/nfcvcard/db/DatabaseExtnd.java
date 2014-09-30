@@ -45,7 +45,7 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public boolean insertContact  (String name, String phone, String email, Uri logo,Uri picuri,int owner)
+    public boolean insertContact  (String name, String phone, String email,String logo,String picuri,int owner)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -53,10 +53,10 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         contentValues.put("name", name);
         contentValues.put("phone", phone);
         contentValues.put("email", email);
-        if (null!= logo)
-        contentValues.put("logouri", logo.toString());
-        if (null!=picuri)
-        contentValues.put("picuri",picuri.toString());
+
+        contentValues.put("logouri", logo);
+
+        contentValues.put("picuri",picuri);
         contentValues.put("owner",owner);
 
         db.insert("nfc_contacts", null, contentValues);
@@ -73,18 +73,18 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         int numRows = (int) DatabaseUtils.queryNumEntries(db, CONTACTS_TABLE_NAME);
         return numRows;
     }
-    public boolean updateContact (Integer id, String name, String phone, String email,Uri logo,Uri picuri)
+    public boolean updateContact (Integer id, String name, String phone, String email,String logo,String picuri)
     {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", name);
         contentValues.put("phone", phone);
         contentValues.put("email", email);
-        if (null!= logo)
-        contentValues.put("logouri", logo.toString());
-        if (null!=picuri)
-        contentValues.put("picuri", picuri.toString());
-        db.update("nfc_contacts", contentValues, "id = ? ", new String[] { Integer.toString(id) } );
+
+        contentValues.put("logouri", logo);
+
+        contentValues.put("picuri", picuri);
+        int result= db.update("nfc_contacts", contentValues, "id = "+id, null );
         return true;
     }
 
@@ -107,8 +107,8 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
                     res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME))+":"+
                     res.getString(res.getColumnIndex(CONTACTS_COLUMN_PHONE))+":"+
                     res.getString(res.getColumnIndex(CONTACTS_COLUMN_EMAIL))+":"+
-                    res.getString(res.getColumnIndex(CONTACTS_PIC_URI))+":"+
-                    res.getString(res.getColumnIndex(CONTACTS_LOGO_URI))
+                    res.getString(res.getColumnIndex(CONTACTS_LOGO_URI))+":"+
+                    res.getString(res.getColumnIndex(CONTACTS_PIC_URI))
             );
             res.moveToNext();
         }
