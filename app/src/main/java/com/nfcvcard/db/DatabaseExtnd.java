@@ -80,11 +80,9 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         contentValues.put("name", name);
         contentValues.put("phone", phone);
         contentValues.put("email", email);
-
         contentValues.put("logouri", logo);
-
         contentValues.put("picuri", picuri);
-        int result= db.update("nfc_contacts", contentValues, "id = "+id, null );
+        int result= db.update("nfc_contacts", contentValues, "id = ? ", new String[] { Integer.toString(id) } );
         return true;
     }
 

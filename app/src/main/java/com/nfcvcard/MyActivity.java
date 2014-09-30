@@ -732,16 +732,15 @@ public class MyActivity extends ActionBarActivity {
                 List imageUriList=contactBundle.getParcelableArrayList("imageUri");
                 List logoUriList=contactBundle.getParcelableArrayList("logo");
 
-                myActivity.databaseExtnd.updateContact(0,contactBundle.getString("name"),
+                myActivity.databaseExtnd.updateContact(1,contactBundle.getString("name"),
                         contactBundle.getString("tlf"), contactBundle.getString("email"),  logoUriList.get(0).toString() ,
                         imageUriList.get(0).toString()  );
                 list = myActivity.databaseExtnd.getAllCotacts();
                 for (int i = 0; i < list.size(); i++) {
                     stringBuilder.append(list.get(i));
                 }
-
                 String s = stringBuilder.toString();
-                Toast.makeText(getActivity(), " updated :)" + s
+                Toast.makeText(getActivity(), contactBundle.getString("name") + " updated :)" + s
                         , Toast.LENGTH_LONG).show();
 
             } else {
