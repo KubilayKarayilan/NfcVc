@@ -11,7 +11,7 @@
         android:layout_width="fill_parent"
         android:layout_height="200dp"
         android:background="@drawable/blurry_dots"
-        android:src="@drawable/kubypic"
+        android:src="@drawable/unknown"
         />
 
     <EditText
@@ -61,7 +61,7 @@
         android:background="@android:color/white"
         android:text="@string/logo"
         android:textAlignment="center"
-        android:src="@drawable/downloaded"/>
+        android:src="@drawable/logohere"/>
 
 
 </LinearLayout>

@@ -101,11 +101,11 @@ public class DatabaseExtnd extends SQLiteOpenHelper{
         Cursor res =  db.rawQuery( "select * from nfc_contacts", null );
         res.moveToFirst();
         while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID)) +":"+
-                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME))+":"+
-                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_PHONE))+":"+
-                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_EMAIL))+":"+
-                    res.getString(res.getColumnIndex(CONTACTS_LOGO_URI))+":"+
+            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID)) +";"+
+                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME))+";"+
+                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_PHONE))+";"+
+                    res.getString(res.getColumnIndex(CONTACTS_COLUMN_EMAIL))+";"+
+                    res.getString(res.getColumnIndex(CONTACTS_LOGO_URI))+";"+
                     res.getString(res.getColumnIndex(CONTACTS_PIC_URI))
             );
             res.moveToNext();

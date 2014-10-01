@@ -390,6 +390,8 @@ public class MyActivity extends ActionBarActivity {
         private MyActivity myActivity;
         private Bundle contactBundle;
         private ArrayList contactList;
+        ArrayList<Uri> urisPic = new ArrayList<>();
+        ArrayList<Uri> urisLogo = new ArrayList<>();
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -414,6 +416,7 @@ public class MyActivity extends ActionBarActivity {
             myActivity = (MyActivity) getActivity();
             contactBundle = myActivity.getSavedData(2);
             contactList = contactBundle.getParcelableArrayList("contactList");
+            Bundle bundle = new Bundle();
 
             byte[] byteArray = null;
             byte[] byteArray2 = null;
@@ -426,15 +429,29 @@ public class MyActivity extends ActionBarActivity {
             if (contactList.size() == 0) {
                 cvPic.setImageDrawable(getResources().getDrawable(R.drawable.unknown));
                 logo.setImageDrawable(getResources().getDrawable(R.drawable.logohere));
-            }else {
-                StringBuilder stringBuilder=new StringBuilder("");
+            } else {
+                StringBuilder stringBuilder = new StringBuilder("");
 
-                for (Object s:contactList) {
-                    stringBuilder.append((String)s);
+                String contanct = (String) contactList.get(0);
+                String[] uriArr = contanct.split(";");
+                if (!uriArr[4].equals("null")) {
+                    Uri logoUri = Uri.parse(uriArr[4]);
+                    logo.setImageURI(logoUri);
+                    urisLogo.add(logoUri);
+                    bundle.putParcelableArrayList("logo", urisLogo);
+                } else {
+                    logo.setImageDrawable(getResources().getDrawable(R.drawable.logohere));
                 }
-                Log.i("dude",stringBuilder.toString());
-           //     cvPic.setImageURI(Uri.parse());
-                //her skal du legge dem i bundle image uri
+                if (!uriArr[5].equals("null")) {
+                    Uri picUri = Uri.parse(uriArr[5]);
+                    cvPic.setImageURI(picUri);
+                    urisPic.add(picUri);
+                    bundle.putParcelableArrayList("imageUri", urisPic);
+                } else {
+                    cvPic.setImageDrawable(getResources().getDrawable(R.drawable.unknown));
+
+                }
+
             }
             clickListnerInit();
 
@@ -453,41 +470,15 @@ public class MyActivity extends ActionBarActivity {
             }
 
 
-            Bundle bundle = new Bundle();
             bundle.putString("name", name.getText().toString());
             bundle.putByteArray("contactPic", byteArray);
-            bundle.putParcelableArrayList("imageUri", null);
-            bundle.putByteArray("logo", byteArray2);
+
+            bundle.putByteArray("logoPic", byteArray2);
             bundle.putString("tlf", tlf.getText().toString());
             bundle.putString("email", email.getText().toString());
             myActivity.saveData(1, bundle);
             String path = myActivity.getExternalFilesDir(null).getPath();
-            OutputStream fOut = null;
-            // Make unknown image
-            File file = new File(path, "unknown.png");
-            try {
-                fOut = new FileOutputStream(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
 
-            bmp.compress(Bitmap.CompressFormat.PNG, 85, fOut);
-            try {
-                fOut.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                fOut.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                MediaStore.Images.Media.insertImage(myActivity.getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
             Bitmap bitmap = ((BitmapDrawable) cvPic.getDrawable()).getBitmap();
             //  Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, 120, 120, false));
             Bitmap cropedBit = getCroppedBitmap(bitmap);
@@ -727,31 +718,21 @@ public class MyActivity extends ActionBarActivity {
             StringBuilder stringBuilder = new StringBuilder();
 
             ArrayList list = myActivity.databaseExtnd.getAllCotacts();
-            if (  list.size() > 0) {
+            if (list.size() > 0) {
 
-                List imageUriList=contactBundle.getParcelableArrayList("imageUri");
-                List logoUriList=contactBundle.getParcelableArrayList("logo");
-
-                myActivity.databaseExtnd.updateContact(1,contactBundle.getString("name"),
-                        contactBundle.getString("tlf"), contactBundle.getString("email"),  logoUriList.get(0).toString() ,
-                        imageUriList.get(0).toString()  );
-                list = myActivity.databaseExtnd.getAllCotacts();
-                for (int i = 0; i < list.size(); i++) {
-                    stringBuilder.append(list.get(i));
-                }
-                String s = stringBuilder.toString();
-                Toast.makeText(getActivity(), contactBundle.getString("name") + " updated :)" + s
-                        , Toast.LENGTH_LONG).show();
-
+                List imageUriList = contactBundle.getParcelableArrayList("imageUri");
+                List logoUriList = contactBundle.getParcelableArrayList("logo");
+                String imageUri=(null!=imageUriList)?imageUriList.get(0).toString():"null";
+                String logoUri=(null!=logoUriList)?logoUriList.get(0).toString():"null";
+                myActivity.databaseExtnd.updateContact(1, contactBundle.getString("name"),
+                        contactBundle.getString("tlf"), contactBundle.getString("email"), logoUri,
+                        imageUri);
             } else {
                 myActivity.databaseExtnd.insertContact(contactBundle.getString("name"),
                         contactBundle.getString("tlf"), contactBundle.getString("email"),
                         contactBundle.getString("logo"), contactBundle.getString("imageUri"), 1);
-                Toast.makeText(getActivity(), contactBundle.getString("name") + " created :)"
-                        , Toast.LENGTH_LONG).show();
+
             }
-
-
 
 
             return rootView;
