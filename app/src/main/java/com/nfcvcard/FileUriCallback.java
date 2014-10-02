@@ -31,8 +31,8 @@ public class FileUriCallback implements NfcAdapter.CreateBeamUrisCallback {
          * Create a list of URIs, get a File,
          * and set its permissions
          */
-         Uri[] mFileUris = new Uri[10];
-        String transferFile = "kubipic.jpg";
+        Uri[] mFileUris = new Uri[10];
+        String transferFile = "CvPicImage.jpg";
         File extDir = externalFilesDir;
         File requestFile = new File(extDir, transferFile);
         requestFile.setReadable(true, false);

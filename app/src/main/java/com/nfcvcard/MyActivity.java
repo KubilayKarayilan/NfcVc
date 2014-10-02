@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,7 @@ import android.nfc.NfcEvent;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 
@@ -125,8 +127,8 @@ public class MyActivity extends ActionBarActivity {
         }
         extDir = getExternalFilesDir(null);
 
-        //  nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
-        nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
+         nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
+        //  nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -148,18 +150,22 @@ public class MyActivity extends ActionBarActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         Toast.makeText(this, "new intent", Toast.LENGTH_LONG).show();
-        handleIntent(intent);
+        try {
+            handleIntent(intent);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void handleIntent(Intent intent) {
 
-        Uri urien = intent.getData();
+    private void handleIntent(Intent intent) throws UnsupportedEncodingException {
+
+       /**/ Uri urien = intent.getData();
         Uri uri;
         String type = intent.getType();
         String action = intent.getAction();
         String message = "nothing in it";
         String incomeMsg = "nothing in it";
-
 
         Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
@@ -176,9 +182,11 @@ public class MyActivity extends ActionBarActivity {
             //   String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
+        // Get the Intent action
 
 
-        Log.i(TAG, "break point" + message);
+
+        Log.i(TAG, "break point");
 
     }
 
@@ -392,7 +400,7 @@ public class MyActivity extends ActionBarActivity {
         private ArrayList contactList;
         ArrayList<Uri> urisPic = new ArrayList<>();
         ArrayList<Uri> urisLogo = new ArrayList<>();
-
+//TODO Husk å finne bildet til å sende til nfc enhet. Cvpic.png slettet
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -469,7 +477,7 @@ public class MyActivity extends ActionBarActivity {
                 byteArray2 = stream.toByteArray();
             }
 
-
+           // saveImageToDisk(bmp);
             bundle.putString("name", name.getText().toString());
             bundle.putByteArray("contactPic", byteArray);
 
@@ -492,6 +500,35 @@ public class MyActivity extends ActionBarActivity {
 
 
             return rootView;
+        }
+
+        private void saveImageToDisk(Bitmap bmp) {
+            String path = myActivity.getExternalFilesDir(null).getPath();
+            OutputStream fOut = null;
+            File file = new File(path, "CvPicImage.jpg");
+            try {
+                fOut = new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            bmp.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+            try {
+                fOut.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                fOut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                MediaStore.Images.Media.insertImage(myActivity.getContentResolver(),file.getAbsolutePath(),file.getName(),file.getName());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)

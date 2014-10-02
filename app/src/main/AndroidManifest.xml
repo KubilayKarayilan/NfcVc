@@ -21,40 +21,22 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="application/com.nfcvcard" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="text/*" />
             </intent-filter>
             <intent-filter>
-
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT"></category>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="vnd.android.nfc"
+                    android:host="ext"
+                    android:pathPrefix="/android.com:pkg"/>
                 <data android:mimeType="application/com.nfcvcard" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="text/*" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.nfc.action.TECH_DISCOVERED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.nfc.action.TECH_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
-            <meta-data
-                android:name="android.nfc.action.NDEF_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
-            <meta-data
-                android:name="android.nfc.action.TAG_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
 
         </activity>
-        <receiver android:name=".receivers.BroadCastNfc">
-            <intent-filter>
-                <action android:name="android.nfc.action.TECH_DISCOVERED" />
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-            </intent-filter>
-        </receiver>
+
     </application>
 <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"></uses-permission>
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
