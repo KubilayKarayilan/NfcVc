@@ -40,7 +40,9 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { NdefRecord.createMime(
                         "application/com.nfcvcard", text.getBytes()) ,
-                        NdefRecord.createUri(createBeamUris())
+                        NdefRecord.createUri(createBeamUris()),
+                        NdefRecord.createMime(
+                                "image/jpeg",getByte() )
                 });
         return msg;
     }
@@ -64,6 +66,11 @@ public class NdefMessageCallback implements NfcAdapter.CreateNdefMessageCallback
         fileUri = Uri.fromFile(requestFile);
         return fileUri;
 
+    }
+    public byte[] getByte(){
+       Bundle bundle= myActivity.getSavedData(1);
+        byte[] bytear = bundle.getByteArray("contactPic");
+        return bytear;
     }
     public String getFileUri(  Uri contentUri) {
         Cursor cursor = null;

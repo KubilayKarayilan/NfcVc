@@ -127,8 +127,8 @@ public class MyActivity extends ActionBarActivity {
         }
         extDir = getExternalFilesDir(null);
 
-         nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
-        //  nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
+        //   nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
+         nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
