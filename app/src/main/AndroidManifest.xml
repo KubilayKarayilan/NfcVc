@@ -20,9 +20,9 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="application/com.nfcvcard" />
-                <data android:mimeType="image/*" />
-                <data android:mimeType="text/*" />
+                <data android:scheme="vnd.android.nfc" android:host="ext"
+                    android:pathPrefix="/android.com:pkg" />
+
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED"/>

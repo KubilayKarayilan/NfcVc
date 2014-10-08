@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -127,8 +128,9 @@ public class MyActivity extends ActionBarActivity {
         }
         extDir = getExternalFilesDir(null);
 
-        //   nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir), this);
-         nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
+          nfcAdapter.setBeamPushUrisCallback(new FileUriCallback(extDir,this), this);
+
+        //  nfcAdapter.setNdefPushMessageCallback(new NdefMessageCallback(extDir, this), this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -154,21 +156,25 @@ public class MyActivity extends ActionBarActivity {
             handleIntent(intent);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+        } catch (FormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
 
-    private void handleIntent(Intent intent) throws UnsupportedEncodingException {
+    private void handleIntent(Intent intent) throws IOException, FormatException {
 
        /**/ Uri urien = intent.getData();
         Uri uri;
         String type = intent.getType();
         String action = intent.getAction();
         String message = "nothing in it";
-        String incomeMsg = "nothing in it";
+        Uri incomeMsg = null;
 
         Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
+         String taag=tagFromIntent.toString();
         Parcelable[] rawMsgs = intent.getParcelableArrayExtra(
                 NfcAdapter.EXTRA_NDEF_MESSAGES);
 
@@ -176,9 +182,10 @@ public class MyActivity extends ActionBarActivity {
             NdefMessage msg = (NdefMessage) rawMsgs[0];
             // record 0 contains the MIME type, record 1 is the AAR, if present
             NdefRecord[] records = msg.getRecords();
-            incomeMsg = new String(msg.getRecords()[0].getPayload());
-            Uri incomeMsg2 = msg.getRecords()[1].toUri();
-            handleFileUri(incomeMsg2);
+            incomeMsg =msg.getRecords()[0].toUri();
+            String incomeMsg2 = new String(msg.getRecords()[1].getPayload());
+             handleFileUri(incomeMsg);
+
             //   String s = handleFileUri(incomeMsg2);
             Toast.makeText(this, "incoming: " + incomeMsg, Toast.LENGTH_LONG).show();
         }
