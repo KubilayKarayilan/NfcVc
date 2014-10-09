@@ -276,7 +276,7 @@ public class MyActivity extends ActionBarActivity {
 
         final PendingIntent pendingIntent = PendingIntent.getActivity(activity.getApplicationContext(), 0, intent, 0);
 
-        IntentFilter[] filters = new IntentFilter[1];
+        IntentFilter[] filters = new IntentFilter[2];
         String[][] techList = new String[][]{};
 
 
@@ -772,9 +772,13 @@ public class MyActivity extends ActionBarActivity {
                         contactBundle.getString("tlf"), contactBundle.getString("email"), logoUri,
                         imageUri);
             } else {
+                List imageUriList = contactBundle.getParcelableArrayList("imageUri");
+                List logoUriList = contactBundle.getParcelableArrayList("logo");
+                String imageUri=(null!=imageUriList)?imageUriList.get(0).toString():"null";
+                String logoUri=(null!=logoUriList)?logoUriList.get(0).toString():"null";
                 myActivity.databaseExtnd.insertContact(contactBundle.getString("name"),
                         contactBundle.getString("tlf"), contactBundle.getString("email"),
-                        contactBundle.getString("logo"), contactBundle.getString("imageUri"), 1);
+                      logoUri,imageUri , 1);
 
             }
 

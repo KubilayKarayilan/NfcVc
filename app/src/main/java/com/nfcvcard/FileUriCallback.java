@@ -40,10 +40,7 @@ public class FileUriCallback implements NfcAdapter.CreateBeamUrisCallback {
         ArrayList<Uri> uris= bundle.getParcelableArrayList("imageUri");
         Uri[] mFileUris = new Uri[1];
 
-        /*
-        mFileUris[0]=uris.get(0);*/
-       String transferFile = "CvPicImage.jpg";
-        File extDir = externalFilesDir;
+
         String path= getFilePathFromUri(uris.get(0));
         File requestFile = new File(path);
         requestFile.setReadable(true, false);
